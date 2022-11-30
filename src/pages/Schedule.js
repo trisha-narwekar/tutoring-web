@@ -5,8 +5,7 @@ import { collection, doc, getDocs, query, setDoc, where } from "firebase/firesto
 import { ViewState, EditingState, IntegratedEditing } from '@devexpress/dx-react-scheduler';
 import { Scheduler, WeekView, Appointments, AppointmentForm } from '@devexpress/dx-react-scheduler-material-ui';
 import { db } from '../firebase/firebase.utils';
-import Paper from '@mui/material/Paper';
-import { DayView } from '@devexpress/dx-react-scheduler-material-ui';
+import { useScheduleData } from './hooks/schedules';
 
 const schedulerData = [
   { startDate: '2022-11-9T011:00', endDate: '2022-11-9T112:00', title: 'hello' },
@@ -41,29 +40,17 @@ function Schedule() {
     }
     main();
   }, [])
-
-  const currentDate = '2022-11-29';
-  const schedulerData = [
-    { startDate: '2022-11-29T09:45', endDate: '2022-11-29T11:00', title: 'Meeting' },
-  ];
-
   return (
     <div>
       <div className="navbar1"></div>
-      <Paper>
-      <Scheduler
-        data={schedulerData}
-      >
-        <ViewState
-          currentDate={currentDate}
-        />
-        <WeekView
-          startDayHour={9}
-          endDayHour={14}
-        />
+      <Scheduler data={data}>
+        <ViewState />
+        <EditingState onCommitChanges={saveAppointment} />
+        <IntegratedEditing />
+        <WeekView startDayHour={11} endDayHour={19} />
         <Appointments />
+        <AppointmentForm />
       </Scheduler>
-    </Paper>
     </div>
   );
 }
