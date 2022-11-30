@@ -1,50 +1,69 @@
 import '../pages/Schedule.css';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import '../pages/Navbar.css';
-import {Calendar, dateFnsLocalizer} from "react-big-calendar";
-import format from "date-fns/format";
-import parse from "date-fns/parse";
-import startOfWeek from "date-fns/startOfWeek";
-import getDay from "date-fns/getDay";
-import "react-big-calendar/lib/css/react-big-calendar.css";
-import DatePicker from "react-datepicker";
+import { collection, doc, getDocs, query, setDoc, where } from "firebase/firestore";
+import { ViewState, EditingState, IntegratedEditing } from '@devexpress/dx-react-scheduler';
+import { Scheduler, WeekView, Appointments, AppointmentForm } from '@devexpress/dx-react-scheduler-material-ui';
+import { db } from '../firebase/firebase.utils';
+import Paper from '@mui/material/Paper';
+import { DayView } from '@devexpress/dx-react-scheduler-material-ui';
 
-const locales = {
-    "en-US": require("date-fns/locale/en-US")
-}
-
-const localizer = dateFnsLocalizer({
-    format,
-    parse,
-    startOfWeek,
-    getDay,
-    locales
-})
-
-const events = [
-    {
-        title: "Big Meeting",
-        allDay: true,
-        start: new Date(2022, 10, 0),
-        end: new Date(2022, 10, 0),
-    },
-    {
-        title: "Vacation",
-        start: new Date(2022, 10, 7),
-        end: new Date(2022, 10, 10),
-    },
-    {
-        title: "Conference",
-        start: new Date(2022, 10, 20),
-        end: new Date(2022, 10, 23),
-    },
+const schedulerData = [
+  { startDate: '2022-11-9T011:00', endDate: '2022-11-9T112:00', title: 'hello' },
+  { startDate: '2022-11-10T012:00', endDate: '2022-11-10T113:00', title: 'gym' },
 ];
 
+const saveAppointment = async (data) => {
+  console.log('appt saved');
+  console.log(data);
+  // Use setDoc to write to the database
+  const randomString = (Math.random() + 1).toString(36).substring(7);
+  await setDoc(doc(db, "events", randomString), {
+    ...data.added,
+    id: randomString
+  })
+}
 function Schedule() {
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    const main = async () => {
+      const date = new Date();
+      date.setDate(date.getDate() - (date.getDay() || 7))
+      const weekFromNow = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 6)
+      console.log("first date", date.toDateString(), " ", date.getDay())
+      console.log("date", weekFromNow.toDateString(), " ", weekFromNow.getDay())
+      const q = query(collection(db, "events"),  where("startDate", ">=", date), where("startDate", "<", weekFromNow))
+      const querySnapshot = await getDocs(q);
+      const v = querySnapshot.docs.map((doc) => doc.data());
+      console.log(v)
+      setData(v);
+      console.log("DAATA", data)
+    }
+    main();
+  }, [])
+
+  const currentDate = '2022-11-29';
+  const schedulerData = [
+    { startDate: '2022-11-29T09:45', endDate: '2022-11-29T11:00', title: 'Meeting' },
+  ];
+
   return (
     <div>
-    <div className="navbar1"></div>
-    <Calendar localizer={localizer} events={events} startAccessor="start" endAccessor="end" style={{height: 500, margin: "50px"}}/>
+      <div className="navbar1"></div>
+      <Paper>
+      <Scheduler
+        data={schedulerData}
+      >
+        <ViewState
+          currentDate={currentDate}
+        />
+        <WeekView
+          startDayHour={9}
+          endDayHour={14}
+        />
+        <Appointments />
+      </Scheduler>
+    </Paper>
     </div>
   );
 }
