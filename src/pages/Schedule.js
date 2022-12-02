@@ -1,27 +1,31 @@
 import '../pages/Schedule.css';
 import React, { useEffect, useState } from 'react';
 import '../pages/Navbar.css';
-import { collection, doc, getDocs, query, setDoc, where } from "firebase/firestore";
-import { ViewState, EditingState, IntegratedEditing } from '@devexpress/dx-react-scheduler';
-import { Scheduler, WeekView, Appointments, AppointmentForm } from '@devexpress/dx-react-scheduler-material-ui';
+import { collection, deleteDoc, doc, getDocs, query, setDoc, updateDoc, where} from "firebase/firestore";
 import { db } from '../firebase/firebase.utils';
 import { useScheduleData } from './hooks/schedules';
-
+import Paper from '@mui/material/Paper';
+import {
+  Scheduler,
+  WeekView,
+  Appointments,
+  AppointmentTooltip,
+  AppointmentForm,
+  AllDayPanel,
+  DragDropProvider
+} from '@devexpress/dx-react-scheduler-material-ui';
+import { ViewState, EditingState, IntegratedEditing } from '@devexpress/dx-react-scheduler';
+import { BinarySearch } from '../algorithms';
 const schedulerData = [
-  { startDate: '2022-11-9T011:00', endDate: '2022-11-9T112:00', title: 'hello' },
-  { startDate: '2022-11-10T012:00', endDate: '2022-11-10T113:00', title: 'gym' },
+  { 
+    startDate: new Date(2022, 12, 2, 10, 0), 
+    endDate: new Date(2022, 12, 2, 12, 0), 
+    title: 'hello', 
+    id: 1
+  },
 ];
 
-const saveAppointment = async (data) => {
-  console.log('appt saved');
-  console.log(data);
-  // Use setDoc to write to the database
-  const randomString = (Math.random() + 1).toString(36).substring(7);
-  await setDoc(doc(db, "events", randomString), {
-    ...data.added,
-    id: randomString
-  })
-}
+
 function Schedule() {
   const [data, setData] = useState([]);
   useEffect(() => {
@@ -29,28 +33,93 @@ function Schedule() {
       const date = new Date();
       date.setDate(date.getDate() - (date.getDay() || 7))
       const weekFromNow = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 6)
-      console.log("first date", date.toDateString(), " ", date.getDay())
-      console.log("date", weekFromNow.toDateString(), " ", weekFromNow.getDay())
       const q = query(collection(db, "events"),  where("startDate", ">=", date), where("startDate", "<", weekFromNow))
       const querySnapshot = await getDocs(q);
       const v = querySnapshot.docs.map((doc) => doc.data());
-      console.log(v)
+      v.map((item) => {
+        item.startDate = item.startDate.toDate();
+        item.endDate = item.endDate.toDate();
+      })
       setData(v);
       console.log("DAATA", data)
+
     }
     main();
   }, [])
+  useEffect(() => {
+    console.log(JSON.stringify(data, null, 2))
+  }, [data])
+  const saveAppointment = async ({added, changed, deleted}) => {
+    console.log("DATA", added, changed, deleted)
+    const randomString = (Math.random() + 1).toString(36).substring(7);
+    let local = JSON.parse(JSON.stringify(data));
+    if(added) {
+      console.log('appt saved');
+      const toAdd = {
+        id: randomString,
+        ...added
+      }
+      local.push(toAdd);
+      setData(local);
+      await setDoc(doc(db, "events", randomString), toAdd);
+
+    } else if(changed) {
+      console.log('appt changed');
+      console.log(Object.keys(changed)[0])
+      const id = data.findIndex((appt) => appt.id === Object.keys(changed)[0]);
+      console.log(id)
+      const toChange = {
+        ...local[id],
+        ...changed[Object.keys(changed)[0]]
+      }
+      local[id] = toChange;
+      setData(local);
+      await updateDoc(doc(db, "events", Object.keys(changed)[0]), toChange);
+    } else if(deleted) {
+      const id = data.findIndex((appt) => appt.id === deleted);
+      local.splice(id, 1);
+      setData(local);
+      await deleteDoc(doc(db, "events", deleted));
+    }
+    // Use setDoc to write to the database
+  }
   return (
     <div>
       <div className="navbar1"></div>
-      <Scheduler data={data}>
-        <ViewState />
-        <EditingState onCommitChanges={saveAppointment} />
-        <IntegratedEditing />
-        <WeekView startDayHour={11} endDayHour={19} />
-        <Appointments />
-        <AppointmentForm />
-      </Scheduler>
+      {/* <Paper>
+        <Scheduler data={schedulerData}>
+          <ViewState
+          // currentDate={new Date()}
+          />
+          <EditingState onCommitChanges={saveAppointment} />
+          <WeekView startDayHour={11} endDayHour={19} />
+          <Appointments />
+        </Scheduler>
+      </Paper> */}
+      <Paper>
+        <Scheduler data={data}>
+          <ViewState 
+            currentDate={new Date()}
+          />
+          <EditingState
+            onCommitChanges={(data) => {
+              saveAppointment(data)
+            }}
+          />
+          <IntegratedEditing />
+          <WeekView startDayHour={9} endDayHour={19} />
+          <Appointments />
+          <AppointmentTooltip showOpenButton showDeleteButton />
+          <AllDayPanel />
+          <DragDropProvider 
+            allowDrag={(data) => {
+              console.log(data)
+              return true;
+            }}
+          />
+          <AppointmentForm />
+        </Scheduler>
+      </Paper>
     </div>
   );
 }
