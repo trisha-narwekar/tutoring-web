@@ -16,15 +16,6 @@ import {
 } from '@devexpress/dx-react-scheduler-material-ui';
 import { ViewState, EditingState, IntegratedEditing } from '@devexpress/dx-react-scheduler';
 import { BinarySearch } from '../algorithms';
-const schedulerData = [
-  { 
-    startDate: new Date(2022, 12, 2, 10, 0), 
-    endDate: new Date(2022, 12, 2, 12, 0), 
-    title: 'hello', 
-    id: 1
-  },
-];
-
 
 function Schedule() {
   const [data, setData] = useState([]);
@@ -46,9 +37,7 @@ function Schedule() {
     }
     main();
   }, [])
-  useEffect(() => {
-    console.log(JSON.stringify(data, null, 2))
-  }, [data])
+
   const saveAppointment = async ({added, changed, deleted}) => {
     console.log("DATA", added, changed, deleted)
     const randomString = (Math.random() + 1).toString(36).substring(7);
@@ -81,21 +70,10 @@ function Schedule() {
       setData(local);
       await deleteDoc(doc(db, "events", deleted));
     }
-    // Use setDoc to write to the database
   }
   return (
     <div>
       <div className="navbar1"></div>
-      {/* <Paper>
-        <Scheduler data={schedulerData}>
-          <ViewState
-          // currentDate={new Date()}
-          />
-          <EditingState onCommitChanges={saveAppointment} />
-          <WeekView startDayHour={11} endDayHour={19} />
-          <Appointments />
-        </Scheduler>
-      </Paper> */}
       <Paper>
         <Scheduler data={data}>
           <ViewState 
