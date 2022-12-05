@@ -2,10 +2,8 @@ import '../pages/Schedule.css';
 import React, { useEffect, useState } from 'react';
 import '../pages/Navbar.css';
 import { collection, doc, getDocs, query, setDoc, where } from "firebase/firestore";
-import { ViewState, EditingState, IntegratedEditing } from '@devexpress/dx-react-scheduler';
-import { Scheduler, WeekView, Appointments, AppointmentForm } from '@devexpress/dx-react-scheduler-material-ui';
 import { db } from '../firebase/firebase.utils';
-import { useScheduleData } from './hooks/schedules';
+import { PopupWidget } from "react-calendly";
 
 const schedulerData = [
   { startDate: '2022-11-9T011:00', endDate: '2022-11-9T112:00', title: 'hello' },
@@ -40,17 +38,27 @@ function Schedule() {
     }
     main();
   }, [])
+  const currentDate = '2022-11-30';
+const schedulerData = [
+  { startDate: '2022-11-30T09:45', endDate: '2022-11-30T11:00', title: 'Meeting' },
+];
+
   return (
     <div>
       <div className="navbar1"></div>
-      <Scheduler data={data}>
-        <ViewState />
-        <EditingState onCommitChanges={saveAppointment} />
-        <IntegratedEditing />
-        <WeekView startDayHour={11} endDayHour={19} />
-        <Appointments />
-        <AppointmentForm />
-      </Scheduler>
+      <div className="App">
+      <PopupWidget
+        url="https://calendly.com/aplus_tutoring"
+        /*
+         * react-calendly uses React's Portal feature (https://reactjs.org/docs/portals.html) to render the popup modal. As a result, you'll need to
+         * specify the rootElement property to ensure that the modal is inserted into the correct domNode.
+         */
+        rootElement={document.getElementById("root")}
+        text="Click here to schedule!"
+        textColor="#ffffff"
+        color="#00a2ff"
+      />
+    </div>
     </div>
   );
 }
