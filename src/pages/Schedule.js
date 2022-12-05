@@ -74,6 +74,11 @@ function Schedule() {
   return (
     <div>
       <div className="navbar1"></div>
+      <img src={require('../media/logo.png')} className="logo_sched"></img>
+      <h1 className="title"> Weekly Schedule </h1>
+      <h1 className="title2"> Double Click on the Schedule to Add Appointment </h1>
+      <h1 className="title2">  </h1>
+      <div className="schedule_box">
       <Paper>
         <Scheduler data={data}>
           <ViewState 
@@ -98,6 +103,7 @@ function Schedule() {
           <AppointmentForm />
         </Scheduler>
       </Paper>
+      </div>
     </div>
   );
 }
