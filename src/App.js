@@ -7,14 +7,14 @@ import Navbar from "./pages/Navbar"
 function App() {
   return (
     <div>
-    <Navbar/>
-    <Router>
-    <Routes>
-          <Route path='/' exact element={<Home/>} />
-          <Route path='/schedule' exact element={<Schedule/>} />
-      </Routes>
+      <Navbar />
+      <Router>
+        <div>
+          <Route path='/' exact element={<Home />} />
+          <Route path='/schedule' exact element={<Schedule />} />
+        </div>
       </Router>
-      </div>
+    </div>
   );
 }
 
