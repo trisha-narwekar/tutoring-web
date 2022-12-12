@@ -5,6 +5,8 @@ import { collection, deleteDoc, doc, getDocs, query, setDoc, updateDoc, where} f
 import { db } from '../firebase/firebase.utils';
 import { useScheduleData } from './hooks/schedules';
 import Paper from '@mui/material/Paper';
+import Navbar from './Navbar';
+import '../pages/Navbar.css';
 import {
   Scheduler,
   WeekView,
@@ -74,6 +76,7 @@ function Schedule() {
   return (
     <div>
       <div className="navbar1"></div>
+      <Navbar />
       <img src={require('../media/logo.png')} className="logo_sched"></img>
       <h1 className="title"> Weekly Schedule </h1>
       <h1 className="title2"> Double Click on the Schedule to Add Appointment </h1>
