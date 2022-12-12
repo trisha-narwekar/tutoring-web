@@ -1,10 +1,12 @@
 import '../pages/Home.css';
 import React from 'react';
 import '../pages/Navbar.css';
+import Navbar from './Navbar';
 
 function Home() {
   return (
     <div>
+      <Navbar />
     <div className="navbar1">
     </div>
     <div className="bar">

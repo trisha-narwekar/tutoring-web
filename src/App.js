@@ -10,10 +10,10 @@ function App() {
   return (
     <>
       <Router>
-        <div>
+        <Routes>
           <Route path='/' exact element={<Home />} />
           <Route path='/schedule' exact element={<Schedule />} />
-        </div>
+        </Routes>
       </Router>
     </>
   );
